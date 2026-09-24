@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>TrustGuard</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <header>
+        <h1>🛡️ TrustGuard</h1>
+        <p>SIM-Swap & Account Takeover Guardian</p>
+    </header>
+
+    <main>
+
+        <section class="hero">
+            <h2>Is your account under attack?</h2>
+
+            <p>
+                Analyze suspicious account activity and
+                identify possible signs of account takeover.
+            </p>
+        </section>
+
+
+        <section class="input-card">
+
+            <h2>Enter Security Events</h2>
+
+            <p class="help-text">
+                Enter one event per line.
+            </p>
+
+            <textarea
+                id="events"
+                placeholder="Example:
+Password reset requested
+SIM replacement requested
+Multiple OTP requests
+Unknown device login"></textarea>
+
+            <div class="buttons">
+
+                <button id="demoBtn">
+                    Try Demo
+                </button>
+
+                <button id="analyzeBtn">
+                    🔍 Analyze
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <section id="resultSection" class="result-section">
+
+            <h2>Security Analysis</h2>
+
+            <div id="riskLevel">
+                Risk analysis will appear here.
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <footer>
+        <p>TrustGuard • Digital Identity Protection</p>
+    </footer>
+
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+
+</html>
