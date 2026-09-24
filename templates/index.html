@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SimSwap Guardian</title>
+
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header>
+            <h1>🛡️ SimSwap Guardian</h1>
+            <p>SIM-Swap & Account Takeover Detection System</p>
+        </header>
+
+        <section class="card">
+
+            <h2>Security Event Analysis</h2>
+
+            <p>
+                Select the suspicious activities detected on the account.
+            </p>
+
+            <div class="events">
+
+                <label>
+                    <input type="checkbox" value="SIM replacement requested">
+                    SIM replacement requested
+                </label>
+
+                <label>
+                    <input type="checkbox" value="Password reset requested">
+                    Password reset requested
+                </label>
+
+                <label>
+                    <input type="checkbox" value="Multiple OTP requests">
+                    Multiple OTP requests
+                </label>
+
+                <label>
+                    <input type="checkbox" value="Login from unknown device">
+                    Login from unknown device
+                </label>
+
+            </div>
+
+            <button onclick="analyzeEvents()">
+                Analyze Security Risk
+            </button>
+
+        </section>
+
+
+        <section class="card result-card">
+
+            <h2>Risk Assessment</h2>
+
+            <div id="loading">
+                Waiting for analysis...
+            </div>
+
+            <div id="result" style="display: none;">
+
+                <div class="risk-score">
+    <span>Risk Score</span>
+    <strong id="riskScore">0</strong>
+
+    <div class="risk-bar">
+        
+        <div id="riskBarFill"></div>
+    </div>
+</div>
+
+                <div class="risk-level">
+                    <span>Risk Level</span>
+                    <strong id="riskLevel">-</strong>
+                </div>
+
+                <h3>Detected Signals</h3>
+
+                <ul id="signals"></ul>
+
+                <h3>AI Security Analysis</h3>
+
+<div id="analysis"></div>
+
+<h3>Recommended Security Actions</h3>
+
+<div class="security-actions">
+
+    <div class="action-card">
+        <h4>🔐 Secure the Account</h4>
+        <p>Change the account password and review active sessions.</p>
+    </div>
+
+    <div class="action-card">
+        <h4>📱 Contact Your Mobile Carrier</h4>
+        <p>Verify whether a SIM replacement or transfer request was made.</p>
+    </div>
+
+    <div class="action-card">
+        <h4>🛡️ Strengthen Authentication</h4>
+        <p>Enable multi-factor authentication and update recovery options.</p>
+    </div>
+
+    <div class="action-card">
+        <h4>🚨 Review Security Activity</h4>
+        <p>Check recent logins, password resets, and unusual OTP activity.</p>
+    </div>
+
+</div>
+            </div>
+
+        </section>
+
+    </div>
+
+    <script src="/static/script.js"></script>
+
+</body>
+
+</html>
