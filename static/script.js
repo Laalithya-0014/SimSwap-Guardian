@@ -114,7 +114,60 @@ analyzeBtn.addEventListener("click", async function () {
                 <p>No specific risk signals detected.</p>
             `;
         }
+        // -----------------------------
+        // Build dynamic attack chain
+        // -----------------------------
+        const attackChainOrder = [
+            {
+                name: "Password Reset",
+                matches: ["Password reset attempt"]
+            },
+            {
+                name: "SIM Replacement",
+                matches: ["SIM replacement request"]
+            },
+            {
+                name: "Phone Number Change",
+                matches: ["Phone number changed"]
+            },
+            {
+                name: "OTP Requests",
+                matches: ["Multiple or unusual OTP activity"]
+            },
+            {
+                name: "Unknown Login",
+                matches: ["Login from unknown device"]
+            }
+        ];
 
+        const detectedChain = attackChainOrder.filter(step =>
+            step.matches.some(match => signals.includes(match))
+        );
+
+        let attackChainHTML = "";
+
+        if (detectedChain.length === 0) {
+
+            attackChainHTML = `
+                <p>No attack chain detected.</p>
+            `;
+
+        } else {
+
+            attackChainHTML = detectedChain
+                .map((step, index) => {
+
+                    const box = `<div>${step.name}</div>`;
+
+                    if (index < detectedChain.length - 1) {
+                        return box + `<span>↓</span>`;
+                    }
+
+                    return box;
+
+                })
+                .join("");
+        }
 
         // -----------------------------
         // Determine risk message
@@ -171,30 +224,17 @@ analyzeBtn.addEventListener("click", async function () {
             </div>
 
 
-            <div class="analysis-box">
+                        <div class="analysis-box">
 
                 <h3>🔗 Attack Chain</h3>
 
                 <div class="attack-chain">
 
-                    <div>Password Reset</div>
-
-                    <span>↓</span>
-
-                    <div>SIM Replacement</div>
-
-                    <span>↓</span>
-
-                    <div>OTP Requests</div>
-
-                    <span>↓</span>
-
-                    <div>Unknown Login</div>
+                    ${attackChainHTML}
 
                 </div>
 
             </div>
-
 
             <div class="analysis-box">
 
