@@ -3,126 +3,83 @@
 
 <head>
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>SimSwap Guardian</title>
+    <title>TrustGuard</title>
 
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
 
-    <div class="container">
+    <header>
+        <h1>🛡️ TrustGuard</h1>
+        <p>SIM-Swap & Account Takeover Guardian</p>
+    </header>
 
-        <header>
-            <h1>🛡️ SimSwap Guardian</h1>
-            <p>SIM-Swap & Account Takeover Detection System</p>
-        </header>
+    <main>
 
-        <section class="card">
-
-            <h2>Security Event Analysis</h2>
+        <section class="hero">
+            <h2>Is your account under attack?</h2>
 
             <p>
-                Select the suspicious activities detected on the account.
+                Analyze suspicious account activity and
+                identify possible signs of account takeover.
+            </p>
+        </section>
+
+
+        <section class="input-card">
+
+            <h2>Enter Security Events</h2>
+
+            <p class="help-text">
+                Enter one event per line.
             </p>
 
-            <div class="events">
+            <textarea
+                id="events"
+                placeholder="Example:
+Password reset requested
+SIM replacement requested
+Multiple OTP requests
+Unknown device login"></textarea>
 
-                <label>
-                    <input type="checkbox" value="SIM replacement requested">
-                    SIM replacement requested
-                </label>
+            <div class="buttons">
 
-                <label>
-                    <input type="checkbox" value="Password reset requested">
-                    Password reset requested
-                </label>
+                <button id="demoBtn">
+                    Try Demo
+                </button>
 
-                <label>
-                    <input type="checkbox" value="Multiple OTP requests">
-                    Multiple OTP requests
-                </label>
-
-                <label>
-                    <input type="checkbox" value="Login from unknown device">
-                    Login from unknown device
-                </label>
+                <button id="analyzeBtn">
+                    🔍 Analyze
+                </button>
 
             </div>
-
-            <button onclick="analyzeEvents()">
-                Analyze Security Risk
-            </button>
 
         </section>
 
 
-        <section class="card result-card">
+        <section id="resultSection" class="result-section">
 
-            <h2>Risk Assessment</h2>
+            <h2>Security Analysis</h2>
 
-            <div id="loading">
-                Waiting for analysis...
-            </div>
-
-            <div id="result" style="display: none;">
-
-                <div class="risk-score">
-    <span>Risk Score</span>
-    <strong id="riskScore">0</strong>
-
-    <div class="risk-bar">
-        
-        <div id="riskBarFill"></div>
-    </div>
-</div>
-
-                <div class="risk-level">
-                    <span>Risk Level</span>
-                    <strong id="riskLevel">-</strong>
-                </div>
-
-                <h3>Detected Signals</h3>
-
-                <ul id="signals"></ul>
-
-                <h3>AI Security Analysis</h3>
-
-<div id="analysis"></div>
-
-<h3>Recommended Security Actions</h3>
-
-<div class="security-actions">
-
-    <div class="action-card">
-        <h4>🔐 Secure the Account</h4>
-        <p>Change the account password and review active sessions.</p>
-    </div>
-
-    <div class="action-card">
-        <h4>📱 Contact Your Mobile Carrier</h4>
-        <p>Verify whether a SIM replacement or transfer request was made.</p>
-    </div>
-
-    <div class="action-card">
-        <h4>🛡️ Strengthen Authentication</h4>
-        <p>Enable multi-factor authentication and update recovery options.</p>
-    </div>
-
-    <div class="action-card">
-        <h4>🚨 Review Security Activity</h4>
-        <p>Check recent logins, password resets, and unusual OTP activity.</p>
-    </div>
-
-</div>
+            <div id="riskLevel">
+                Risk analysis will appear here.
             </div>
 
         </section>
 
-    </div>
+    </main>
 
-    <script src="/static/script.js"></script>
+
+    <footer>
+        <p>TrustGuard • Digital Identity Protection</p>
+    </footer>
+
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 
 </body>
 

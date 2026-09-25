@@ -1,27 +1,70 @@
-async function analyzeEvents() {
+const eventsBox = document.getElementById("events");
+const demoBtn = document.getElementById("demoBtn");
+const analyzeBtn = document.getElementById("analyzeBtn");
+const resultSection = document.getElementById("resultSection");
+const riskLevel = document.getElementById("riskLevel");
 
-    const checkboxes = document.querySelectorAll(
-        '.events input[type="checkbox"]:checked'
-    );
 
-    const events = Array.from(checkboxes).map(
-        checkbox => checkbox.value
-    );
+// -----------------------------
+// Demo button
+// -----------------------------
+demoBtn.addEventListener("click", function () {
+    eventsBox.value =
+`Password reset requested
+SIM replacement requested
+Multiple OTP requests
+Unknown device login
+Phone number changed`;
+});
 
-    if (events.length === 0) {
-        alert("Please select at least one security event.");
+
+// -----------------------------
+// Analyze button
+// -----------------------------
+analyzeBtn.addEventListener("click", async function () {
+
+    const rawEvents = eventsBox.value.trim();
+
+    // No events entered
+    if (rawEvents === "") {
+        riskLevel.innerHTML = `
+            <div class="analysis-box">
+                <h3>⚠️ No Events Entered</h3>
+                <p>Please enter some security events to analyze.</p>
+            </div>
+        `;
+
+        resultSection.scrollIntoView({
+            behavior: "smooth"
+        });
+
         return;
     }
 
-    document.getElementById("loading").textContent =
-        "Analyzing security activity...";
 
-    document.getElementById("result").style.display = "none";
+    // Convert textarea lines into an array
+    const events = rawEvents
+        .split("\n")
+        .map(event => event.trim())
+        .filter(event => event.length > 0);
+
+
+    // Show loading state
+    analyzeBtn.disabled = true;
+    analyzeBtn.textContent = "Analyzing...";
+
+    riskLevel.innerHTML = `
+        <div class="analysis-box">
+            <h3>🔍 Analyzing Security Events...</h3>
+            <p>Please wait while the system evaluates the activity.</p>
+        </div>
+    `;
+
 
     try {
 
+        // Send events to Flask backend
         const response = await fetch("/analyze", {
-
             method: "POST",
 
             headers: {
@@ -31,150 +74,184 @@ async function analyzeEvents() {
             body: JSON.stringify({
                 events: events
             })
-
         });
 
-        const contentType = response.headers.get("content-type");
-
-        if (!contentType || !contentType.includes("application/json")) {
-            throw new Error(
-                "Server did not return JSON. Check the Flask terminal."
-            );
-        }
 
         const data = await response.json();
 
+
+        // Backend returned an error
         if (!response.ok) {
-            throw new Error(data.error || "Analysis failed");
+            throw new Error(
+                data.error || "Server returned an error."
+            );
         }
 
-        // Display risk score
-       // Update visual risk bar
-       // Display risk score
-document.getElementById("riskScore").textContent =
-    data.risk_score;
 
-// Update visual risk bar
-const riskBar = document.getElementById("riskBarFill");
-
-let score = Number(data.risk_score);
-
-if (score < 0) {
-    score = 0;
-}
-
-if (score > 100) {
-    score = 100;
-}
+        // -----------------------------
+        // Extract backend response
+        // -----------------------------
+        const score = data.risk_score;
+        const level = data.risk_level;
+        const signals = data.signals || [];
+        const analysis = data.analysis || "No analysis available.";
 
 
-riskBar.style.width = score + "%";
-        // Display risk level
-        document.getElementById("riskLevel").textContent =
-            data.risk_level;
+        // -----------------------------
+        // Build signals HTML
+        // -----------------------------
+        let signalsHTML = "";
 
-        // Display signals
-        const signalsList = document.getElementById("signals");
-        signalsList.innerHTML = "";
+        if (signals.length > 0) {
 
-        data.signals.forEach(signal => {
-            const li = document.createElement("li");
-            li.textContent = signal;
-            signalsList.appendChild(li);
+            signalsHTML = signals
+                .map(signal => `<p>✓ ${signal}</p>`)
+                .join("");
+
+        } else {
+
+            signalsHTML = `
+                <p>No specific risk signals detected.</p>
+            `;
+        }
+
+
+        // -----------------------------
+        // Determine risk message
+        // -----------------------------
+        let riskMessage = "";
+
+        if (level === "CRITICAL") {
+
+            riskMessage =
+                "Critical-risk activity detected.";
+
+        } else if (level === "HIGH") {
+
+            riskMessage =
+                "High-risk activity detected.";
+
+        } else if (level === "MEDIUM") {
+
+            riskMessage =
+                "Moderate-risk activity detected.";
+
+        } else {
+
+            riskMessage =
+                "Low-risk activity detected.";
+        }
+
+
+        // -----------------------------
+        // Display complete result
+        // -----------------------------
+        riskLevel.innerHTML = `
+
+            <div class="risk-header">
+
+                <div>
+                    <h3>🔴 ${level} RISK</h3>
+                    <p>${riskMessage}</p>
+                </div>
+
+                <div class="risk-score">
+                    ${score}<span>/100</span>
+                </div>
+
+            </div>
+
+
+            <div class="analysis-box">
+
+                <h3>🚨 Detected Signals</h3>
+
+                ${signalsHTML}
+
+            </div>
+
+
+            <div class="analysis-box">
+
+                <h3>🔗 Attack Chain</h3>
+
+                <div class="attack-chain">
+
+                    <div>Password Reset</div>
+
+                    <span>↓</span>
+
+                    <div>SIM Replacement</div>
+
+                    <span>↓</span>
+
+                    <div>OTP Requests</div>
+
+                    <span>↓</span>
+
+                    <div>Unknown Login</div>
+
+                </div>
+
+            </div>
+
+
+            <div class="analysis-box">
+
+                <h3>🤖 AI Analysis</h3>
+
+                <p>${analysis}</p>
+
+            </div>
+
+
+            <div class="analysis-box">
+
+                <h3>🛡️ Recommended Actions</h3>
+
+                <p>1. Contact your mobile service provider.</p>
+                <p>2. Secure your email and account passwords.</p>
+                <p>3. Do not share OTPs with anyone.</p>
+                <p>4. Review recent account login activity.</p>
+
+            </div>
+
+        `;
+
+
+        // Scroll to result
+        resultSection.scrollIntoView({
+            behavior: "smooth"
         });
 
-        // Display Gemini analysis
-        document.getElementById("analysis").textContent =
-            data.analysis;
-
-        // Update security recommendations
-        updateSecurityActions(data.risk_level);
-
-        // Show result
-        document.getElementById("result").style.display = "block";
-
-        document.getElementById("loading").textContent = "";
 
     } catch (error) {
 
-        console.error(error);
+        console.error("Analysis error:", error);
 
-        document.getElementById("loading").textContent =
-            "Error: " + error.message;
-    }
-}
+        riskLevel.innerHTML = `
 
+            <div class="analysis-box">
 
-// Update recommendations based on risk level
-function updateSecurityActions(riskLevel) {
+                <h3>❌ Analysis Failed</h3>
 
-    const actionsContainer =
-        document.querySelector(".security-actions");
+                <p>
+                    ${error.message}
+                </p>
 
-    if (!actionsContainer) {
-        return;
-    }
+                <p>
+                    Please make sure the Flask server is running.
+                </p>
 
-    if (riskLevel === "HIGH") {
-
-        actionsContainer.innerHTML = `
-            <div class="action-card">
-                <h4>🚨 Secure the Account Immediately</h4>
-                <p>Change the account password and review active sessions immediately.</p>
             </div>
 
-            <div class="action-card">
-                <h4>📱 Contact Your Mobile Carrier</h4>
-                <p>Verify whether an unauthorized SIM replacement or transfer request was made.</p>
-            </div>
-
-            <div class="action-card">
-                <h4>🛡️ Strengthen Authentication</h4>
-                <p>Enable multi-factor authentication and update account recovery options.</p>
-            </div>
-
-            <div class="action-card">
-                <h4>🔍 Review Security Activity</h4>
-                <p>Check recent logins, password resets, and unusual OTP activity.</p>
-            </div>
         `;
 
-    } else if (riskLevel === "MEDIUM") {
+    } finally {
 
-        actionsContainer.innerHTML = `
-            <div class="action-card">
-                <h4>🔐 Review Account Security</h4>
-                <p>Check your password and review recent account activity.</p>
-            </div>
+        analyzeBtn.disabled = false;
+        analyzeBtn.textContent = "🔍 Analyze";
 
-            <div class="action-card">
-                <h4>📱 Verify SIM Activity</h4>
-                <p>Check with your mobile carrier if any unexpected SIM activity occurred.</p>
-            </div>
-
-            <div class="action-card">
-                <h4>🛡️ Enable Multi-Factor Authentication</h4>
-                <p>Use an additional authentication method to protect the account.</p>
-            </div>
-        `;
-
-    } else {
-
-        actionsContainer.innerHTML = `
-            <div class="action-card">
-                <h4>👀 Monitor Account Activity</h4>
-                <p>Continue monitoring login and account activity for unusual behavior.</p>
-            </div>
-
-            <div class="action-card">
-                <h4>🔐 Maintain Account Security</h4>
-                <p>Keep your password strong and your recovery information updated.</p>
-            </div>
-
-            <div class="action-card">
-                <h4>🛡️ Keep Authentication Enabled</h4>
-                <p>Continue using multi-factor authentication where available.</p>
-            </div>
-        `;
     }
-}
+
+});
