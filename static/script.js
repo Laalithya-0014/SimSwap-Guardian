@@ -5,12 +5,9 @@ const resultSection = document.getElementById("resultSection");
 const riskLevel = document.getElementById("riskLevel");
 
 
-// -----------------------------
-// Demo button
-// -----------------------------
-// -----------------------------
-// Demo scenarios
-// -----------------------------
+// ============================================================
+// DEMO SCENARIOS
+// ============================================================
 
 const demoScenarios = [
 
@@ -64,23 +61,17 @@ const demoScenarios = [
 
 ];
 
-
-// -----------------------------
-// Track last demo scenario
-// -----------------------------
-
 let lastDemoIndex = -1;
 
 
-// -----------------------------
-// Demo button
-// -----------------------------
+// ============================================================
+// DEMO BUTTON
+// ============================================================
 
 demoBtn.addEventListener("click", function () {
 
     let randomIndex;
 
-    // Prevent the same scenario from appearing twice consecutively
     do {
         randomIndex = Math.floor(
             Math.random() * demoScenarios.length
@@ -92,21 +83,127 @@ demoBtn.addEventListener("click", function () {
 
     lastDemoIndex = randomIndex;
 
-    // Load selected scenario into textarea
     eventsBox.value = demoScenarios[randomIndex].join("\n");
-
 });
 
 
-// -----------------------------
-// Analyze button
-// -----------------------------
+// ============================================================
+// SMALL VISUAL ENHANCEMENTS
+// ============================================================
+
+const enhancementStyle = document.createElement("style");
+
+enhancementStyle.textContent = `
+    .incident-banner {
+        background: #fff4f4;
+        border: 1px solid #ffd0d0;
+        border-radius: 12px;
+        padding: 14px 18px;
+        margin-bottom: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .incident-title {
+        font-weight: 700;
+        color: #b91c1c;
+        font-size: 14px;
+    }
+
+    .incident-meta {
+        font-size: 12px;
+        color: #667085;
+    }
+
+    .processing-step {
+        padding: 8px 0;
+        opacity: 0;
+        animation: trustguardFadeIn 0.4s forwards;
+    }
+
+    .attack-step {
+        opacity: 0;
+        transform: translateY(8px);
+        animation: trustguardStepIn 0.45s forwards;
+    }
+
+    .risk-score-animated {
+        transition: transform 0.2s;
+    }
+
+    .risk-score-animated.pulse {
+        animation: trustguardPulse 0.8s ease-in-out;
+    }
+
+    @keyframes trustguardFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(5px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes trustguardStepIn {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes trustguardPulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.06);
+        }
+    }
+`;
+
+document.head.appendChild(enhancementStyle);
+
+
+// ============================================================
+// INCIDENT ID
+// ============================================================
+
+function generateIncidentId() {
+
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+    let id = "";
+
+    for (let i = 0; i < 6; i++) {
+        id += chars.charAt(
+            Math.floor(Math.random() * chars.length)
+        );
+    }
+
+    return "TG-" + id;
+}
+
+
+// ============================================================
+// ANALYZE BUTTON
+// ============================================================
+
 analyzeBtn.addEventListener("click", async function () {
 
     const rawEvents = eventsBox.value.trim();
 
     // No events entered
     if (rawEvents === "") {
+
         riskLevel.innerHTML = `
             <div class="analysis-box">
                 <h3>⚠️ No Events Entered</h3>
@@ -122,29 +219,78 @@ analyzeBtn.addEventListener("click", async function () {
     }
 
 
-    // Convert textarea lines into an array
     const events = rawEvents
         .split("\n")
         .map(event => event.trim())
         .filter(event => event.length > 0);
 
 
-    // Show loading state
+    // Disable button
     analyzeBtn.disabled = true;
     analyzeBtn.textContent = "Analyzing...";
 
+
+    // ========================================================
+    // INCIDENT PROCESSING ANIMATION
+    // ========================================================
+
     riskLevel.innerHTML = `
         <div class="analysis-box">
-            <h3>🔍 Analyzing Security Events...</h3>
-            <p>Please wait while the system evaluates the activity.</p>
+
+            <div class="incident-banner">
+
+                <div>
+                    <div class="incident-title">
+                        🔴 LIVE SECURITY INCIDENT
+                    </div>
+
+                    <div class="incident-meta">
+                        Incident ID: ${generateIncidentId()}
+                    </div>
+                </div>
+
+                <div class="incident-meta">
+                    ${events.length} security events detected
+                </div>
+
+            </div>
+
+            <div class="processing-step" style="animation-delay:0.1s">
+                🔍 Correlating security events...
+            </div>
+
+            <div class="processing-step" style="animation-delay:0.5s">
+                ⚡ Evaluating threat signals...
+            </div>
+
+            <div class="processing-step" style="animation-delay:0.9s">
+                🔗 Reconstructing possible attack chain...
+            </div>
+
+            <div class="processing-step" style="animation-delay:1.3s">
+                🤖 Generating AI security assessment...
+            </div>
+
         </div>
     `;
+
+    resultSection.scrollIntoView({
+        behavior: "smooth"
+    });
 
 
     try {
 
-        // Send events to Flask backend
+        // Small visual delay so the processing sequence is visible
+        await new Promise(resolve => setTimeout(resolve, 1600));
+
+
+        // ====================================================
+        // SEND EVENTS TO FLASK
+        // ====================================================
+
         const response = await fetch("/analyze", {
+
             method: "POST",
 
             headers: {
@@ -154,32 +300,36 @@ analyzeBtn.addEventListener("click", async function () {
             body: JSON.stringify({
                 events: events
             })
+
         });
 
 
         const data = await response.json();
 
 
-        // Backend returned an error
         if (!response.ok) {
+
             throw new Error(
                 data.error || "Server returned an error."
             );
+
         }
 
 
-        // -----------------------------
-        // Extract backend response
-        // -----------------------------
+        // ====================================================
+        // EXTRACT RESPONSE
+        // ====================================================
+
         const score = data.risk_score;
         const level = data.risk_level;
         const signals = data.signals || [];
         const analysis = data.analysis || "No analysis available.";
 
 
-        // -----------------------------
-        // Build signals HTML
-        // -----------------------------
+        // ====================================================
+        // SIGNALS
+        // ====================================================
+
         let signalsHTML = "";
 
         if (signals.length > 0) {
@@ -193,36 +343,50 @@ analyzeBtn.addEventListener("click", async function () {
             signalsHTML = `
                 <p>No specific risk signals detected.</p>
             `;
+
         }
-        // -----------------------------
-        // Build dynamic attack chain
-        // -----------------------------
+
+
+        // ====================================================
+        // ATTACK CHAIN
+        // ====================================================
+
         const attackChainOrder = [
+
             {
                 name: "Password Reset",
                 matches: ["Password reset attempt"]
             },
+
             {
                 name: "SIM Replacement",
                 matches: ["SIM replacement request"]
             },
+
             {
                 name: "Phone Number Change",
                 matches: ["Phone number changed"]
             },
+
             {
                 name: "OTP Requests",
                 matches: ["Multiple or unusual OTP activity"]
             },
+
             {
                 name: "Unknown Login",
                 matches: ["Login from unknown device"]
             }
+
         ];
 
+
         const detectedChain = attackChainOrder.filter(step =>
-            step.matches.some(match => signals.includes(match))
+            step.matches.some(match =>
+                signals.includes(match)
+            )
         );
+
 
         let attackChainHTML = "";
 
@@ -237,21 +401,35 @@ analyzeBtn.addEventListener("click", async function () {
             attackChainHTML = detectedChain
                 .map((step, index) => {
 
-                    const box = `<div>${step.name}</div>`;
+                    const delay = index * 0.25;
+
+                    const box = `
+                        <div
+                            class="attack-step"
+                            style="animation-delay:${delay}s"
+                        >
+                            ${step.name}
+                        </div>
+                    `;
 
                     if (index < detectedChain.length - 1) {
+
                         return box + `<span>↓</span>`;
+
                     }
 
                     return box;
 
                 })
                 .join("");
+
         }
 
-        // -----------------------------
-        // Determine risk message
-        // -----------------------------
+
+        // ====================================================
+        // RISK MESSAGE
+        // ====================================================
+
         let riskMessage = "";
 
         if (level === "CRITICAL") {
@@ -273,23 +451,53 @@ analyzeBtn.addEventListener("click", async function () {
 
             riskMessage =
                 "Low-risk activity detected.";
+
         }
 
 
-        // -----------------------------
-        // Display complete result
-        // -----------------------------
+        // ====================================================
+        // DISPLAY RESULT
+        // ====================================================
+
         riskLevel.innerHTML = `
+
+            <div class="incident-banner">
+
+                <div>
+
+                    <div class="incident-title">
+                        🔴 LIVE SECURITY INCIDENT
+                    </div>
+
+                    <div class="incident-meta">
+                        Incident ID: ${generateIncidentId()}
+                    </div>
+
+                </div>
+
+                <div class="incident-meta">
+                    ${events.length} security events correlated
+                </div>
+
+            </div>
+
 
             <div class="risk-header">
 
                 <div>
+
                     <h3>🔴 ${level} RISK</h3>
+
                     <p>${riskMessage}</p>
+
                 </div>
 
-                <div class="risk-score">
-                    ${score}<span>/100</span>
+
+                <div class="risk-score risk-score-animated">
+
+                    <span id="animatedScore">0</span>
+                    <span>/100</span>
+
                 </div>
 
             </div>
@@ -304,7 +512,7 @@ analyzeBtn.addEventListener("click", async function () {
             </div>
 
 
-                        <div class="analysis-box">
+            <div class="analysis-box">
 
                 <h3>🔗 Attack Chain</h3>
 
@@ -315,6 +523,7 @@ analyzeBtn.addEventListener("click", async function () {
                 </div>
 
             </div>
+
 
             <div class="analysis-box">
 
@@ -339,7 +548,48 @@ analyzeBtn.addEventListener("click", async function () {
         `;
 
 
-        // Scroll to result
+        // ====================================================
+        // ANIMATE SCORE
+        // ====================================================
+
+        const scoreElement =
+            document.getElementById("animatedScore");
+
+        let currentScore = 0;
+
+        const increment = Math.max(
+            1,
+            Math.ceil(score / 35)
+        );
+
+        const scoreTimer = setInterval(() => {
+
+            currentScore += increment;
+
+            if (currentScore >= score) {
+
+                currentScore = score;
+
+                clearInterval(scoreTimer);
+
+                const scoreContainer =
+                    document.querySelector(
+                        ".risk-score-animated"
+                    );
+
+                if (scoreContainer) {
+
+                    scoreContainer.classList.add("pulse");
+
+                }
+
+            }
+
+            scoreElement.textContent = currentScore;
+
+        }, 25);
+
+
         resultSection.scrollIntoView({
             behavior: "smooth"
         });
