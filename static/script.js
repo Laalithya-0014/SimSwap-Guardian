@@ -8,13 +8,93 @@ const riskLevel = document.getElementById("riskLevel");
 // -----------------------------
 // Demo button
 // -----------------------------
+// -----------------------------
+// Demo scenarios
+// -----------------------------
+
+const demoScenarios = [
+
+    [
+        "Password reset requested after an unfamiliar login attempt",
+        "SIM replacement requested through the mobile carrier",
+        "Phone number changed shortly after the SIM replacement",
+        "Multiple OTP requests generated within a short period",
+        "Login from unknown device detected from a new location"
+    ],
+
+    [
+        "Password reset requested for the account",
+        "Recovery email address changed unexpectedly",
+        "Phone number changed without prior user confirmation",
+        "Multiple OTP requests generated during account recovery",
+        "Unknown device login detected immediately after recovery"
+    ],
+
+    [
+        "SIM replacement requested for the registered mobile number",
+        "Multiple OTP requests received within five minutes",
+        "Phone number changed during the recovery process",
+        "Password reset attempt detected from a new session",
+        "Unknown device login detected after successful authentication"
+    ],
+
+    [
+        "Password reset requested following repeated failed login attempts",
+        "Multiple OTP requests generated from an unfamiliar session",
+        "SIM replacement request detected for the registered number",
+        "Unknown device login detected shortly after authentication",
+        "Phone number changed during the same recovery window"
+    ],
+
+    [
+        "Email address changed unexpectedly during account recovery",
+        "Password reset requested from an unfamiliar device",
+        "SIM replacement requested shortly after the recovery attempt",
+        "Multiple OTP requests detected within a short time",
+        "Unknown device login detected after the phone number changed"
+    ],
+
+    [
+        "SIM replacement requested while the account was already under recovery",
+        "Phone number changed immediately after the SIM replacement request",
+        "Multiple OTP requests generated within a few minutes",
+        "Password reset requested from an unfamiliar session",
+        "Login from unknown device detected after OTP verification"
+    ]
+
+];
+
+
+// -----------------------------
+// Track last demo scenario
+// -----------------------------
+
+let lastDemoIndex = -1;
+
+
+// -----------------------------
+// Demo button
+// -----------------------------
+
 demoBtn.addEventListener("click", function () {
-    eventsBox.value =
-`Password reset requested
-SIM replacement requested
-Multiple OTP requests
-Unknown device login
-Phone number changed`;
+
+    let randomIndex;
+
+    // Prevent the same scenario from appearing twice consecutively
+    do {
+        randomIndex = Math.floor(
+            Math.random() * demoScenarios.length
+        );
+    } while (
+        demoScenarios.length > 1 &&
+        randomIndex === lastDemoIndex
+    );
+
+    lastDemoIndex = randomIndex;
+
+    // Load selected scenario into textarea
+    eventsBox.value = demoScenarios[randomIndex].join("\n");
+
 });
 
 
